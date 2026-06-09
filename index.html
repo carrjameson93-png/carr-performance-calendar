@@ -132,7 +132,7 @@
       align-items: center;
       justify-content: center;
       text-shadow: 0 1px 2px #000;
-      transition: all .15s ease;
+      transition: transform .12s ease;
       transform: translateY(calc(var(--height) * -1));
       z-index: 1;
     }
@@ -148,9 +148,9 @@
       background: inherit;
       border: 1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 4px 4px 6px rgba(255,255,255,.22),
-        inset -5px -7px 9px rgba(0,0,0,.68),
-        0 14px 18px rgba(0,0,0,.45);
+        inset 3px 3px 5px rgba(255,255,255,.18),
+        inset -4px -6px 8px rgba(0,0,0,.62),
+        0 8px 12px rgba(0,0,0,.35);
       z-index: -2;
     }
 
@@ -163,7 +163,7 @@
       height: calc(24px + var(--height));
       border-radius: 4px;
       background:
-        linear-gradient(to bottom, rgba(255,255,255,.24), rgba(255,255,255,.04) 28%, rgba(0,0,0,.28) 100%);
+        linear-gradient(to bottom, rgba(255,255,255,.2), rgba(255,255,255,.04) 28%, rgba(0,0,0,.25) 100%);
       z-index: -1;
       pointer-events: none;
     }
@@ -174,7 +174,7 @@
     }
 
     .day:hover {
-      transform: translateY(calc(var(--height) * -1 - 8px)) scale(1.18);
+      transform: translateY(calc(var(--height) * -1 - 5px)) scale(1.12);
       z-index: 20;
     }
 
@@ -196,10 +196,10 @@
     .today::before {
       box-shadow:
         0 0 0 2px #fff,
-        0 0 16px rgba(255,255,255,.9),
-        inset 4px 4px 6px rgba(255,255,255,.22),
-        inset -5px -7px 9px rgba(0,0,0,.68),
-        0 14px 18px rgba(0,0,0,.45);
+        0 0 12px rgba(255,255,255,.75),
+        inset 3px 3px 5px rgba(255,255,255,.18),
+        inset -4px -6px 8px rgba(0,0,0,.62),
+        0 8px 12px rgba(0,0,0,.35);
     }
 
     .dark-horse { background: linear-gradient(145deg, #4c4f50, #151719); }
@@ -272,9 +272,7 @@
         transform: none;
         margin-bottom: 20px;
       }
-      .graph-wrap {
-        padding-top: 50px;
-      }
+      .graph-wrap { padding-top: 50px; }
     }
   </style>
 </head>
@@ -336,6 +334,7 @@ const calendar = document.getElementById("calendar");
 const details = document.getElementById("details");
 const year = 2027;
 const completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
+const dayElements = {};
 let selectedKey = null;
 
 const seasonData = {
@@ -480,7 +479,13 @@ function getPrescription(season, w) {
   return p.build3;
 }
 
-function renderCalendar() {
+function getWorkout(date, season, sw) {
+  return sw >= 13
+    ? "Benchmark / Test Week: " + seasonData[season].benchmark
+    : seasonData[season].workouts[date.getDay()];
+}
+
+function buildCalendarOnce() {
   calendar.innerHTML = "";
   const today = new Date();
 
@@ -494,30 +499,34 @@ function renderCalendar() {
 
     const square = document.createElement("div");
     square.className = `day ${getSeasonClass(season)}`;
+    square.dataset.key = key;
     square.style.setProperty("--height", height + "px");
     square.innerHTML = `<span>${wave}.${getWeekOfWave(sw)}</span>${completedDays[key] ? '<div class="slash"></div>' : ''}`;
 
     if (completedDays[key]) square.classList.add("completed");
-    if (selectedKey === key) square.classList.add("selected");
     if (date.toDateString() === today.toDateString()) square.classList.add("today");
 
     square.onclick = () => selectDay(date, key);
+
+    dayElements[key] = square;
     calendar.appendChild(square);
   }
 
-  const count = Object.keys(completedDays).length;
-  document.getElementById("completedCount").innerText = count;
-  document.getElementById("progressPercent").innerText = Math.round((count / 365) * 100) + "%";
+  updateStats();
 }
 
 function selectDay(date, key) {
+  if (selectedKey && dayElements[selectedKey]) {
+    dayElements[selectedKey].classList.remove("selected");
+  }
+
   selectedKey = key;
+  dayElements[key].classList.add("selected");
+
   const season = getSeason(date);
   const sw = getSeasonWeek(date);
   const wave = getWave(sw);
-  const workout = sw >= 13
-    ? "Benchmark / Test Week: " + seasonData[season].benchmark
-    : seasonData[season].workouts[date.getDay()];
+  const workout = getWorkout(date, season, sw);
 
   details.innerHTML = `
     <h2>Selected Day</h2>
@@ -531,17 +540,38 @@ function selectDay(date, key) {
     <div class="row"><div class="label">Season Benchmark</div><div class="value">${seasonData[season].benchmark}</div></div>
     <button onclick="toggleComplete('${key}')">${completedDays[key] ? "Mark Incomplete" : "Mark Complete"}</button>
   `;
-
-  renderCalendar();
 }
 
 function toggleComplete(key) {
-  completedDays[key] ? delete completedDays[key] : completedDays[key] = true;
+  const square = dayElements[key];
+
+  if (completedDays[key]) {
+    delete completedDays[key];
+    square.classList.remove("completed");
+    const slash = square.querySelector(".slash");
+    if (slash) slash.remove();
+  } else {
+    completedDays[key] = true;
+    square.classList.add("completed");
+    square.insertAdjacentHTML("beforeend", '<div class="slash"></div>');
+  }
+
   localStorage.setItem("completedDays", JSON.stringify(completedDays));
-  renderCalendar();
+  updateStats();
+
+  if (selectedKey === key) {
+    const button = details.querySelector("button");
+    if (button) button.textContent = completedDays[key] ? "Mark Incomplete" : "Mark Complete";
+  }
 }
 
-renderCalendar();
+function updateStats() {
+  const count = Object.keys(completedDays).length;
+  document.getElementById("completedCount").innerText = count;
+  document.getElementById("progressPercent").innerText = Math.round((count / 365) * 100) + "%";
+}
+
+buildCalendarOnce();
 </script>
 </body>
 </html>
