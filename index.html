@@ -5,14 +5,12 @@
   <style>
     body {
       margin: 0;
-      background: #0b0d0f;
+      background: radial-gradient(circle at top, #1a1f24, #070809);
       color: #e6e6e6;
       font-family: Arial, sans-serif;
     }
 
-    .app {
-      padding: 32px;
-    }
+    .app { padding: 32px; }
 
     .header {
       border-bottom: 1px solid #2a2f35;
@@ -33,16 +31,18 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 1fr 360px;
+      grid-template-columns: 1fr 380px;
       gap: 28px;
     }
 
     .calendar-card, .panel {
-      background: #12161a;
+      background: linear-gradient(145deg, #151a1f, #0f1317);
       border: 1px solid #2a2f35;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 22px;
-      box-shadow: 0 0 30px rgba(0,0,0,.35);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 20px 45px rgba(0,0,0,.45);
     }
 
     .legend {
@@ -68,18 +68,18 @@
 
     .calendar {
       display: grid;
-      grid-template-columns: repeat(53, 18px);
-      grid-template-rows: repeat(7, 18px);
+      grid-template-columns: repeat(53, 20px);
+      grid-template-rows: repeat(7, 20px);
       grid-auto-flow: column;
-      gap: 5px;
+      gap: 6px;
       overflow-x: auto;
-      padding-bottom: 10px;
+      padding: 8px 0 12px;
     }
 
     .day {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
       cursor: pointer;
       font-size: 7px;
       display: flex;
@@ -87,22 +87,34 @@
       justify-content: center;
       color: white;
       position: relative;
-      border: 1px solid rgba(255,255,255,.08);
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0,0,0,.8);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow:
+        inset 2px 2px 3px rgba(255,255,255,.18),
+        inset -2px -2px 4px rgba(0,0,0,.55),
+        0 4px 7px rgba(0,0,0,.5);
+      transition: transform .12s ease, box-shadow .12s ease;
     }
 
     .day:hover {
-      transform: scale(1.35);
+      transform: translateY(-4px) scale(1.45);
       z-index: 5;
       border-color: #fff;
+      box-shadow:
+        inset 2px 2px 3px rgba(255,255,255,.22),
+        inset -2px -2px 4px rgba(0,0,0,.65),
+        0 10px 18px rgba(0,0,0,.7);
     }
 
     .completed::after {
       content: "";
       position: absolute;
-      width: 24px;
+      width: 28px;
       height: 2px;
-      background: #e6e6e6;
+      background: #f2f2f2;
       transform: rotate(-35deg);
+      box-shadow: 0 1px 3px #000;
     }
 
     .today {
@@ -110,10 +122,10 @@
       outline-offset: 2px;
     }
 
-    .dark-horse { background: #2a2d31; }
-    .rebuild { background: #2f6f4e; }
-    .grind { background: #9a3b22; }
-    .harvest { background: #9b741f; }
+    .dark-horse { background: linear-gradient(145deg, #4a4f55, #202327); }
+    .rebuild { background: linear-gradient(145deg, #3f9b6a, #1f563b); }
+    .grind { background: linear-gradient(145deg, #c24b2a, #742514); }
+    .harvest { background: linear-gradient(145deg, #c4962d, #6f5014); }
 
     .panel h2 {
       margin-top: 0;
@@ -137,6 +149,7 @@
     .value {
       font-size: 16px;
       margin-top: 4px;
+      line-height: 1.4;
     }
 
     button {
@@ -152,9 +165,7 @@
       text-transform: uppercase;
     }
 
-    button:hover {
-      background: #ffffff;
-    }
+    button:hover { background: #ffffff; }
   </style>
 </head>
 
@@ -172,7 +183,7 @@
           <span><div class="dot rebuild"></div>Rebuild</span>
           <span><div class="dot grind"></div>The Grind</span>
           <span><div class="dot harvest"></div>Harvest</span>
-          <span>Diagonal slash = completed</span>
+          <span>Slash = completed</span>
         </div>
 
         <div class="calendar" id="calendar"></div>
@@ -196,6 +207,13 @@
       "Rebuild": {
         quality: "Joint Health & Stability",
         benchmark: "Single-leg landmine deadlift for load",
+        prescription: {
+          build1: "3 x 8/side @ controlled tempo",
+          build2: "4 x 6/side @ moderate load",
+          build3: "5 x 5/side @ heavier but clean",
+          reload: "2-3 x 8/side @ light/moderate, perfect positions",
+          test: "Build to heavy technical set of 3/side"
+        },
         workouts: {
           1: "Single-arm DB Bench + Zone 2",
           2: "Long Run / Zone 2",
@@ -210,6 +228,13 @@
       "The Grind": {
         quality: "Work Capacity",
         benchmark: "5K Run Time Trial + Strongman Circuit",
+        prescription: {
+          build1: "5 x 5 @ moderate load + Zone 2",
+          build2: "6 x 4 @ heavier load + Zone 2",
+          build3: "8 x 3 @ strong, fast reps + Zone 2",
+          reload: "3 x 5 @ light/moderate, crisp speed",
+          test: "5K time trial + strongman circuit"
+        },
         workouts: {
           1: "Incline Barbell Bench + Zone 2",
           2: "Long Run / Zone 2",
@@ -224,6 +249,13 @@
       "Harvest": {
         quality: "Hypertrophy & Anaerobic",
         benchmark: "Cleans + Push Press for Load",
+        prescription: {
+          build1: "4 x 8 @ controlled volume",
+          build2: "5 x 6 @ heavier hypertrophy load",
+          build3: "6 x 4 @ heavy strength-hypertrophy",
+          reload: "3 x 8 @ light/moderate pump work",
+          test: "Build to heavy clean + push press single"
+        },
         workouts: {
           1: "Power Cleans",
           2: "Upper Body Sweaty Pump",
@@ -238,6 +270,13 @@
       "Dark Horse": {
         quality: "Low Gear Strength / Powerbuilding",
         benchmark: "1RM Front Squat, Deadlift, Bench",
+        prescription: {
+          build1: "5 x 5 @ 70-75%",
+          build2: "5 x 3 @ 80-85%",
+          build3: "6 x 2 @ 85-90%",
+          reload: "3 x 5 @ 60-65%",
+          test: "Build to 1RM"
+        },
         workouts: {
           1: "Front Squats",
           2: "Upper Body Hypertrophy + Zone 2",
@@ -279,10 +318,26 @@
       return 3;
     }
 
+    function getWeekOfWave(seasonWeek) {
+      if (seasonWeek >= 13) return "Test";
+      return ((seasonWeek - 1) % 4) + 1;
+    }
+
     function getWeekType(seasonWeek) {
       if (seasonWeek >= 13) return "Test Week";
       if (seasonWeek % 4 === 0) return "Reload Week";
       return "Build Week";
+    }
+
+    function getPrescription(season, seasonWeek) {
+      const weekOfWave = getWeekOfWave(seasonWeek);
+      const p = seasonData[season].prescription;
+
+      if (weekOfWave === "Test") return p.test;
+      if (weekOfWave === 4) return p.reload;
+      if (weekOfWave === 1) return p.build1;
+      if (weekOfWave === 2) return p.build2;
+      return p.build3;
     }
 
     function getWorkout(date, season, seasonWeek) {
@@ -308,11 +363,10 @@
         const seasonWeek = getSeasonWeek(date);
         const wave = getWave(seasonWeek);
         const weekType = getWeekType(seasonWeek);
-        const workout = getWorkout(date, season, seasonWeek);
 
         const square = document.createElement("div");
         square.className = `day ${getSeasonClass(season)}`;
-        square.innerText = `${wave}.${seasonWeek}`;
+        square.innerText = `${wave}.${getWeekOfWave(seasonWeek)}`;
         square.title = date.toDateString();
 
         if (completedDays[dateKey]) square.classList.add("completed");
@@ -326,6 +380,9 @@
         }
 
         square.onclick = function () {
+          const workout = getWorkout(date, season, seasonWeek);
+          const prescription = getPrescription(season, seasonWeek);
+
           details.innerHTML = `
             <h2>${date.toDateString()}</h2>
 
@@ -341,7 +398,7 @@
 
             <div class="info">
               <div class="label">Wave / Week</div>
-              <div class="value">Wave ${wave} / Season Week ${seasonWeek}</div>
+              <div class="value">Wave ${wave} / Week ${getWeekOfWave(seasonWeek)}</div>
             </div>
 
             <div class="info">
@@ -352,6 +409,11 @@
             <div class="info">
               <div class="label">Workout</div>
               <div class="value">${workout}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Lift Prescription</div>
+              <div class="value">${prescription}</div>
             </div>
 
             <div class="info">
