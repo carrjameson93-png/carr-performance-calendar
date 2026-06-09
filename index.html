@@ -12,11 +12,11 @@
 
     .app {
       padding: 28px;
+      min-height: 100vh;
       background:
         radial-gradient(circle at top left, rgba(80,120,80,.18), transparent 35%),
         radial-gradient(circle at top right, rgba(180,90,40,.12), transparent 30%),
         #050708;
-      min-height: 100vh;
     }
 
     .top {
@@ -33,9 +33,7 @@
       box-shadow: 0 18px 45px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
     }
 
-    .brand {
-      padding: 22px;
-    }
+    .brand { padding: 22px; }
 
     h1 {
       margin: 0;
@@ -44,9 +42,7 @@
       text-transform: uppercase;
     }
 
-    .green {
-      color: #78c943;
-    }
+    .green { color: #78c943; }
 
     .season-card {
       padding: 16px;
@@ -79,6 +75,7 @@
       text-transform: uppercase;
       font-size: 13px;
       color: #bfc6cc;
+      flex-wrap: wrap;
     }
 
     .legend-box {
@@ -88,7 +85,9 @@
       display: inline-block;
       margin-right: 7px;
       vertical-align: middle;
-      box-shadow: inset 2px 2px 3px rgba(255,255,255,.2), inset -3px -3px 5px rgba(0,0,0,.65);
+      box-shadow:
+        inset 2px 2px 3px rgba(255,255,255,.2),
+        inset -3px -3px 5px rgba(0,0,0,.65);
     }
 
     .graph-wrap {
@@ -113,9 +112,9 @@
       grid-template-rows: repeat(7, 24px);
       grid-auto-flow: column;
       gap: 5px;
-      transform: rotateX(52deg) rotateZ(-6deg);
+      transform: rotateX(38deg) rotateZ(-3deg);
       transform-origin: top left;
-      margin: 18px 0 70px 20px;
+      margin: 12px 0 90px 20px;
     }
 
     .day {
@@ -132,7 +131,7 @@
       align-items: center;
       justify-content: center;
       text-shadow: 0 1px 2px #000;
-      transition: .12s;
+      transition: all .15s ease;
     }
 
     .day::before {
@@ -141,33 +140,38 @@
       inset: 0;
       border-radius: 3px;
       background: inherit;
-      filter: brightness(1.2);
-      transform: translateZ(10px);
+      transform: translateZ(var(--height));
       border: 1px solid rgba(255,255,255,.18);
-      box-shadow: inset 3px 3px 5px rgba(255,255,255,.22), inset -4px -4px 7px rgba(0,0,0,.6);
+      box-shadow:
+        inset 3px 3px 5px rgba(255,255,255,.22),
+        inset -4px -4px 7px rgba(0,0,0,.6),
+        0 12px 18px rgba(0,0,0,.4);
     }
 
     .day::after {
       content: "";
       position: absolute;
       width: 24px;
-      height: 10px;
-      background: rgba(0,0,0,.45);
-      transform: rotateX(90deg) translateY(5px) translateZ(-19px);
+      height: var(--height);
+      background: rgba(0,0,0,.38);
+      bottom: 0;
       transform-origin: bottom;
-      bottom: -5px;
+      transform:
+        rotateX(90deg)
+        translateY(calc(var(--height) / 2))
+        translateZ(calc(var(--height) * -1));
       border-radius: 0 0 3px 3px;
     }
 
     .day span {
       position: relative;
       z-index: 2;
-      transform: translateZ(11px);
+      transform: translateZ(calc(var(--height) + 1px));
     }
 
     .day:hover {
-      transform: translateZ(12px) scale(1.2);
-      z-index: 10;
+      transform: translateZ(12px) scale(1.18);
+      z-index: 20;
     }
 
     .completed .slash {
@@ -175,7 +179,7 @@
       width: 30px;
       height: 3px;
       background: white;
-      transform: translateZ(13px) rotate(-35deg);
+      transform: translateZ(calc(var(--height) + 3px)) rotate(-35deg);
       z-index: 4;
       box-shadow: 0 1px 4px #000;
     }
@@ -198,9 +202,13 @@
     .grind { background: linear-gradient(145deg, #f06a3c, #8c260f); }
     .harvest { background: linear-gradient(145deg, #ffd24a, #8a650f); }
 
-    .panel {
-      padding: 20px;
+    .load-note {
+      margin-top: -52px;
+      color: #9aa3ad;
+      font-size: 13px;
     }
+
+    .panel { padding: 20px; }
 
     .panel h2 {
       margin-top: 0;
@@ -250,23 +258,16 @@
       gap: 14px;
     }
 
-    .stat .num {
-      font-size: 30px;
-    }
-
-    .stat .text {
-      color: #9aa3ad;
-      font-size: 13px;
-    }
+    .stat .num { font-size: 30px; }
+    .stat .text { color: #9aa3ad; font-size: 13px; }
 
     @media(max-width: 1000px) {
-      .top, .main {
-        grid-template-columns: 1fr;
-      }
+      .top, .main { grid-template-columns: 1fr; }
       .calendar {
         transform: none;
         margin-bottom: 20px;
       }
+      .load-note { margin-top: 10px; }
     }
   </style>
 </head>
@@ -301,6 +302,10 @@
             <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
           </div>
           <div class="calendar" id="calendar"></div>
+        </div>
+
+        <div class="load-note">
+          * Height represents load/intensity. Taller blocks = higher training load.
         </div>
       </div>
 
@@ -445,9 +450,22 @@ function getWeekType(w) {
   return "Build Week";
 }
 
+function getLoadHeight(w) {
+  const wow = getWeekOfWave(w);
+
+  if (wow === 1) return 12;
+  if (wow === 2) return 22;
+  if (wow === 3) return 34;
+  if (wow === 4) return 10;
+  if (wow === "Test") return 42;
+
+  return 12;
+}
+
 function getPrescription(season, w) {
   const p = seasonData[season].prescription;
   const wow = getWeekOfWave(w);
+
   if (wow === "Test") return p.test;
   if (wow === 4) return p.reload;
   if (wow === 1) return p.build1;
@@ -465,9 +483,11 @@ function renderCalendar() {
     const season = getSeason(date);
     const sw = getSeasonWeek(date);
     const wave = getWave(sw);
-    const square = document.createElement("div");
+    const height = getLoadHeight(sw);
 
+    const square = document.createElement("div");
     square.className = `day ${getSeasonClass(season)}`;
+    square.style.setProperty("--height", height + "px");
     square.innerHTML = `<span>${wave}.${getWeekOfWave(sw)}</span>${completedDays[key] ? '<div class="slash"></div>' : ''}`;
 
     if (completedDays[key]) square.classList.add("completed");
@@ -475,7 +495,6 @@ function renderCalendar() {
     if (date.toDateString() === today.toDateString()) square.classList.add("today");
 
     square.onclick = () => selectDay(date, key);
-
     calendar.appendChild(square);
   }
 
@@ -489,7 +508,9 @@ function selectDay(date, key) {
   const season = getSeason(date);
   const sw = getSeasonWeek(date);
   const wave = getWave(sw);
-  const workout = sw >= 13 ? "Benchmark / Test Week: " + seasonData[season].benchmark : seasonData[season].workouts[date.getDay()];
+  const workout = sw >= 13
+    ? "Benchmark / Test Week: " + seasonData[season].benchmark
+    : seasonData[season].workouts[date.getDay()];
 
   details.innerHTML = `
     <h2>Selected Day</h2>
@@ -503,6 +524,7 @@ function selectDay(date, key) {
     <div class="row"><div class="label">Season Benchmark</div><div class="value">${seasonData[season].benchmark}</div></div>
     <button onclick="toggleComplete('${key}')">${completedDays[key] ? "Mark Incomplete" : "Mark Complete"}</button>
   `;
+
   renderCalendar();
 }
 
