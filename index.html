@@ -5,444 +5,514 @@
   <style>
     body {
       margin: 0;
-      background: radial-gradient(circle at top, #1a1f24, #070809);
-      color: #e6e6e6;
+      background: #050708;
+      color: #e8e8e8;
       font-family: Arial, sans-serif;
     }
 
-    .app { padding: 32px; }
+    .app {
+      padding: 28px;
+      background:
+        radial-gradient(circle at top left, rgba(80,120,80,.18), transparent 35%),
+        radial-gradient(circle at top right, rgba(180,90,40,.12), transparent 30%),
+        #050708;
+      min-height: 100vh;
+    }
 
-    .header {
-      border-bottom: 1px solid #2a2f35;
-      padding-bottom: 20px;
-      margin-bottom: 24px;
+    .top {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .brand, .season-card, .panel, .calendar-card, .stats {
+      background: linear-gradient(145deg, rgba(20,25,29,.96), rgba(8,11,13,.96));
+      border: 1px solid #263036;
+      border-radius: 12px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    .brand {
+      padding: 22px;
     }
 
     h1 {
       margin: 0;
-      letter-spacing: 2px;
+      font-size: 34px;
+      letter-spacing: 3px;
       text-transform: uppercase;
     }
 
-    .subtitle {
-      color: #9aa3ad;
-      margin-top: 8px;
+    .green {
+      color: #78c943;
     }
 
-    .layout {
+    .season-card {
+      padding: 16px;
+      font-size: 14px;
+    }
+
+    .season-title {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .main {
       display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 28px;
+      grid-template-columns: 1fr 330px;
+      gap: 18px;
     }
 
-    .calendar-card, .panel {
-      background: linear-gradient(145deg, #151a1f, #0f1317);
-      border: 1px solid #2a2f35;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.05),
-        0 20px 45px rgba(0,0,0,.45);
+    .calendar-card {
+      padding: 20px;
+      overflow-x: auto;
     }
 
     .legend {
       display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 22px;
-      font-size: 13px;
-      color: #b9c0c7;
-    }
-
-    .legend span {
-      display: flex;
+      gap: 22px;
       align-items: center;
-      gap: 6px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      font-size: 13px;
+      color: #bfc6cc;
     }
 
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
+    .legend-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-right: 7px;
+      vertical-align: middle;
+      box-shadow: inset 2px 2px 3px rgba(255,255,255,.2), inset -3px -3px 5px rgba(0,0,0,.65);
+    }
+
+    .graph-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      perspective: 1000px;
+    }
+
+    .days-label {
+      display: grid;
+      grid-template-rows: repeat(7, 24px);
+      gap: 5px;
+      font-size: 12px;
+      color: #d0d0d0;
+      padding-top: 4px;
     }
 
     .calendar {
       display: grid;
-      grid-template-columns: repeat(53, 20px);
-      grid-template-rows: repeat(7, 20px);
+      grid-template-columns: repeat(53, 24px);
+      grid-template-rows: repeat(7, 24px);
       grid-auto-flow: column;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 8px 0 12px;
+      gap: 5px;
+      transform: rotateX(52deg) rotateZ(-6deg);
+      transform-origin: top left;
+      margin: 18px 0 70px 20px;
     }
 
     .day {
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
+      border-radius: 3px;
+      position: relative;
+      transform-style: preserve-3d;
+      color: rgba(255,255,255,.85);
       font-size: 7px;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      text-shadow: 0 1px 2px #000;
+      transition: .12s;
+    }
+
+    .day::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      background: inherit;
+      filter: brightness(1.2);
+      transform: translateZ(10px);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: inset 3px 3px 5px rgba(255,255,255,.22), inset -4px -4px 7px rgba(0,0,0,.6);
+    }
+
+    .day::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 10px;
+      background: rgba(0,0,0,.45);
+      transform: rotateX(90deg) translateY(5px) translateZ(-19px);
+      transform-origin: bottom;
+      bottom: -5px;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .day span {
       position: relative;
-      font-weight: bold;
-      text-shadow: 0 1px 2px rgba(0,0,0,.8);
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow:
-        inset 2px 2px 3px rgba(255,255,255,.18),
-        inset -2px -2px 4px rgba(0,0,0,.55),
-        0 4px 7px rgba(0,0,0,.5);
-      transition: transform .12s ease, box-shadow .12s ease;
+      z-index: 2;
+      transform: translateZ(11px);
     }
 
     .day:hover {
-      transform: translateY(-4px) scale(1.45);
-      z-index: 5;
-      border-color: #fff;
-      box-shadow:
-        inset 2px 2px 3px rgba(255,255,255,.22),
-        inset -2px -2px 4px rgba(0,0,0,.65),
-        0 10px 18px rgba(0,0,0,.7);
+      transform: translateZ(12px) scale(1.2);
+      z-index: 10;
     }
 
-    .completed::after {
-      content: "";
+    .completed .slash {
       position: absolute;
-      width: 28px;
-      height: 2px;
-      background: #f2f2f2;
-      transform: rotate(-35deg);
-      box-shadow: 0 1px 3px #000;
+      width: 30px;
+      height: 3px;
+      background: white;
+      transform: translateZ(13px) rotate(-35deg);
+      z-index: 4;
+      box-shadow: 0 1px 4px #000;
     }
 
-    .today {
+    .selected::before {
       outline: 2px solid #ffffff;
       outline-offset: 2px;
     }
 
-    .dark-horse { background: linear-gradient(145deg, #4a4f55, #202327); }
-    .rebuild { background: linear-gradient(145deg, #3f9b6a, #1f563b); }
-    .grind { background: linear-gradient(145deg, #c24b2a, #742514); }
-    .harvest { background: linear-gradient(145deg, #c4962d, #6f5014); }
+    .today::before {
+      box-shadow:
+        0 0 0 2px #fff,
+        0 0 16px rgba(255,255,255,.9),
+        inset 3px 3px 5px rgba(255,255,255,.22),
+        inset -4px -4px 7px rgba(0,0,0,.6);
+    }
+
+    .dark-horse { background: linear-gradient(145deg, #4c4f50, #151719); }
+    .rebuild { background: linear-gradient(145deg, #8cd966, #235c22); }
+    .grind { background: linear-gradient(145deg, #f06a3c, #8c260f); }
+    .harvest { background: linear-gradient(145deg, #ffd24a, #8a650f); }
+
+    .panel {
+      padding: 20px;
+    }
 
     .panel h2 {
       margin-top: 0;
+      color: #78c943;
       text-transform: uppercase;
+      font-size: 16px;
       letter-spacing: 1px;
     }
 
-    .info {
-      margin: 14px 0;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #2a2f35;
+    .row {
+      border-bottom: 1px solid #263036;
+      padding: 13px 0;
     }
 
     .label {
-      color: #8f98a3;
+      color: #78c943;
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      margin-bottom: 5px;
     }
 
     .value {
-      font-size: 16px;
-      margin-top: 4px;
-      line-height: 1.4;
+      font-size: 17px;
+      line-height: 1.35;
     }
 
     button {
       width: 100%;
       margin-top: 14px;
-      padding: 12px;
-      background: #d6d6d6;
-      border: none;
+      padding: 14px;
       border-radius: 8px;
-      color: #0b0d0f;
+      border: 1px solid #65a832;
+      background: linear-gradient(145deg, #3f8424, #1d4e17);
+      color: white;
       font-weight: bold;
+      letter-spacing: 1px;
       cursor: pointer;
       text-transform: uppercase;
     }
 
-    button:hover { background: #ffffff; }
+    .stats {
+      margin-top: 18px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .stat .num {
+      font-size: 30px;
+    }
+
+    .stat .text {
+      color: #9aa3ad;
+      font-size: 13px;
+    }
+
+    @media(max-width: 1000px) {
+      .top, .main {
+        grid-template-columns: 1fr;
+      }
+      .calendar {
+        transform: none;
+        margin-bottom: 20px;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="header">
+<div class="app">
+
+  <div class="top">
+    <div class="brand">
       <h1>Carr Performance OS</h1>
-      <div class="subtitle">365-Day Training Map</div>
+      <div class="green">365-DAY TRAINING MAP</div>
     </div>
-
-    <div class="layout">
-      <div class="calendar-card">
-        <div class="legend">
-          <span><div class="dot dark-horse"></div>Dark Horse</span>
-          <span><div class="dot rebuild"></div>Rebuild</span>
-          <span><div class="dot grind"></div>The Grind</span>
-          <span><div class="dot harvest"></div>Harvest</span>
-          <span>Slash = completed</span>
-        </div>
-
-        <div class="calendar" id="calendar"></div>
-      </div>
-
-      <div class="panel" id="details">
-        <h2>Mission Panel</h2>
-        <p>Select a day to view the training assignment.</p>
-      </div>
-    </div>
+    <div class="season-card"><div class="season-title">Dark Horse</div>Jan 1 – Mar 31<br>Low Gear Strength</div>
+    <div class="season-card"><div class="season-title green">Rebuild</div>Apr 1 – Jun 30<br>Joint Health & Stability</div>
+    <div class="season-card"><div class="season-title" style="color:#ff6640;">The Grind</div>Jul 1 – Sep 30<br>Work Capacity</div>
+    <div class="season-card"><div class="season-title" style="color:#ffd24a;">Harvest</div>Oct 1 – Dec 31<br>Hypertrophy & Anaerobic</div>
   </div>
 
-  <script>
-    const calendar = document.getElementById("calendar");
-    const details = document.getElementById("details");
-    const year = 2027;
+  <div class="main">
+    <div>
+      <div class="calendar-card">
+        <div class="legend">
+          <span><i class="legend-box dark-horse"></i>Dark Horse</span>
+          <span><i class="legend-box rebuild"></i>Rebuild</span>
+          <span><i class="legend-box grind"></i>The Grind</span>
+          <span><i class="legend-box harvest"></i>Harvest</span>
+          <span>Slash = Completed</span>
+        </div>
 
-    const completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
+        <div class="graph-wrap">
+          <div class="days-label">
+            <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+          </div>
+          <div class="calendar" id="calendar"></div>
+        </div>
+      </div>
 
-    const seasonData = {
-      "Rebuild": {
-        quality: "Joint Health & Stability",
-        benchmark: "Single-leg landmine deadlift for load",
-        prescription: {
-          build1: "3 x 8/side @ controlled tempo",
-          build2: "4 x 6/side @ moderate load",
-          build3: "5 x 5/side @ heavier but clean",
-          reload: "2-3 x 8/side @ light/moderate, perfect positions",
-          test: "Build to heavy technical set of 3/side"
-        },
-        workouts: {
-          1: "Single-arm DB Bench + Zone 2",
-          2: "Long Run / Zone 2",
-          3: "Single-leg Landmine Deadlift",
-          4: "Upper Body Sweaty Pump",
-          5: "Carries + Sprint Work",
-          6: "Long Sweaty Pump / Zone 2",
-          0: "Recovery"
-        }
-      },
+      <div class="stats">
+        <div class="stat"><div class="label">Days Completed</div><div class="num" id="completedCount">0</div><div class="text">Total</div></div>
+        <div class="stat"><div class="label">Progress</div><div class="num" id="progressPercent">0%</div><div class="text">Year</div></div>
+        <div class="stat"><div class="label">Benchmark Weeks</div><div class="num">4</div><div class="text">End of each season</div></div>
+        <div class="stat"><div class="label">Structure</div><div class="num">3</div><div class="text">Waves per season</div></div>
+      </div>
+    </div>
 
-      "The Grind": {
-        quality: "Work Capacity",
-        benchmark: "5K Run Time Trial + Strongman Circuit",
-        prescription: {
-          build1: "5 x 5 @ moderate load + Zone 2",
-          build2: "6 x 4 @ heavier load + Zone 2",
-          build3: "8 x 3 @ strong, fast reps + Zone 2",
-          reload: "3 x 5 @ light/moderate, crisp speed",
-          test: "5K time trial + strongman circuit"
-        },
-        workouts: {
-          1: "Incline Barbell Bench + Zone 2",
-          2: "Long Run / Zone 2",
-          3: "Front Squats + Zone 2",
-          4: "Long Full Body Sweaty Pump / Zone 2",
-          5: "Z Press + Zone 2",
-          6: "Long Run / Sweaty Pump / Strongman Circuit",
-          0: "Recovery"
-        }
-      },
+    <div class="panel" id="details">
+      <h2>Selected Day</h2>
+      <p>Select a block to view the mission.</p>
+    </div>
+  </div>
+</div>
 
-      "Harvest": {
-        quality: "Hypertrophy & Anaerobic",
-        benchmark: "Cleans + Push Press for Load",
-        prescription: {
-          build1: "4 x 8 @ controlled volume",
-          build2: "5 x 6 @ heavier hypertrophy load",
-          build3: "6 x 4 @ heavy strength-hypertrophy",
-          reload: "3 x 8 @ light/moderate pump work",
-          test: "Build to heavy clean + push press single"
-        },
-        workouts: {
-          1: "Power Cleans",
-          2: "Upper Body Sweaty Pump",
-          3: "Push Press / Push Jerk",
-          4: "Lower Body Sweaty Pump",
-          5: "Deadlifts",
-          6: "Long Zone 2 + Carries",
-          0: "Recovery"
-        }
-      },
+<script>
+const calendar = document.getElementById("calendar");
+const details = document.getElementById("details");
+const year = 2027;
+const completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
+let selectedKey = null;
 
-      "Dark Horse": {
-        quality: "Low Gear Strength / Powerbuilding",
-        benchmark: "1RM Front Squat, Deadlift, Bench",
-        prescription: {
-          build1: "5 x 5 @ 70-75%",
-          build2: "5 x 3 @ 80-85%",
-          build3: "6 x 2 @ 85-90%",
-          reload: "3 x 5 @ 60-65%",
-          test: "Build to 1RM"
-        },
-        workouts: {
-          1: "Front Squats",
-          2: "Upper Body Hypertrophy + Zone 2",
-          3: "Deadlifts",
-          4: "Lower Body Hypertrophy + Zone 2",
-          5: "Bench",
-          6: "Long Zone 2",
-          0: "Recovery"
-        }
-      }
-    };
-
-    function getSeason(date) {
-      const month = date.getMonth() + 1;
-      if (month >= 1 && month <= 3) return "Dark Horse";
-      if (month >= 4 && month <= 6) return "Rebuild";
-      if (month >= 7 && month <= 9) return "The Grind";
-      return "Harvest";
+const seasonData = {
+  "Rebuild": {
+    quality: "Joint Health & Stability",
+    benchmark: "Single-leg landmine deadlift for load",
+    prescription: {
+      build1: "3 x 8/side @ controlled tempo",
+      build2: "4 x 6/side @ moderate load",
+      build3: "5 x 5/side @ heavier but clean",
+      reload: "2-3 x 8/side @ light/moderate, perfect positions",
+      test: "Build to heavy technical set of 3/side"
+    },
+    workouts: {
+      1: "Single-arm DB Bench + Zone 2",
+      2: "Long Run / Zone 2",
+      3: "Single-leg Landmine Deadlift",
+      4: "Upper Body Sweaty Pump",
+      5: "Carries + Sprint Work",
+      6: "Long Sweaty Pump / Zone 2",
+      0: "Recovery"
     }
-
-    function getSeasonClass(season) {
-      if (season === "Dark Horse") return "dark-horse";
-      if (season === "Rebuild") return "rebuild";
-      if (season === "The Grind") return "grind";
-      return "harvest";
+  },
+  "The Grind": {
+    quality: "Work Capacity",
+    benchmark: "5K Run Time Trial + Strongman Circuit",
+    prescription: {
+      build1: "5 x 5 @ moderate load + Zone 2",
+      build2: "6 x 4 @ heavier load + Zone 2",
+      build3: "8 x 3 @ strong, fast reps + Zone 2",
+      reload: "3 x 5 @ light/moderate, crisp speed",
+      test: "5K time trial + strongman circuit"
+    },
+    workouts: {
+      1: "Incline Barbell Bench + Zone 2",
+      2: "Long Run / Zone 2",
+      3: "Front Squats + Zone 2",
+      4: "Long Full Body Sweaty Pump / Zone 2",
+      5: "Z Press + Zone 2",
+      6: "Long Run / Sweaty Pump / Strongman Circuit",
+      0: "Recovery"
     }
-
-    function getSeasonWeek(date) {
-      const month = date.getMonth();
-      const quarterStartMonth = Math.floor(month / 3) * 3;
-      const quarterStart = new Date(date.getFullYear(), quarterStartMonth, 1);
-      const pastDays = Math.floor((date - quarterStart) / 86400000);
-      return Math.floor(pastDays / 7) + 1;
+  },
+  "Harvest": {
+    quality: "Hypertrophy & Anaerobic",
+    benchmark: "Cleans + Push Press for Load",
+    prescription: {
+      build1: "4 x 8 @ controlled volume",
+      build2: "5 x 6 @ heavier hypertrophy load",
+      build3: "6 x 4 @ heavy strength-hypertrophy",
+      reload: "3 x 8 @ light/moderate pump work",
+      test: "Build to heavy clean + push press single"
+    },
+    workouts: {
+      1: "Power Cleans",
+      2: "Upper Body Sweaty Pump",
+      3: "Push Press / Push Jerk",
+      4: "Lower Body Sweaty Pump",
+      5: "Deadlifts",
+      6: "Long Zone 2 + Carries",
+      0: "Recovery"
     }
-
-    function getWave(seasonWeek) {
-      if (seasonWeek <= 4) return 1;
-      if (seasonWeek <= 8) return 2;
-      return 3;
+  },
+  "Dark Horse": {
+    quality: "Low Gear Strength / Powerbuilding",
+    benchmark: "1RM Front Squat, Deadlift, Bench",
+    prescription: {
+      build1: "5 x 5 @ 70-75%",
+      build2: "5 x 3 @ 80-85%",
+      build3: "6 x 2 @ 85-90%",
+      reload: "3 x 5 @ 60-65%",
+      test: "Build to 1RM"
+    },
+    workouts: {
+      1: "Front Squats",
+      2: "Upper Body Hypertrophy + Zone 2",
+      3: "Deadlifts",
+      4: "Lower Body Hypertrophy + Zone 2",
+      5: "Bench",
+      6: "Long Zone 2",
+      0: "Recovery"
     }
+  }
+};
 
-    function getWeekOfWave(seasonWeek) {
-      if (seasonWeek >= 13) return "Test";
-      return ((seasonWeek - 1) % 4) + 1;
-    }
+function getSeason(date) {
+  const m = date.getMonth() + 1;
+  if (m <= 3) return "Dark Horse";
+  if (m <= 6) return "Rebuild";
+  if (m <= 9) return "The Grind";
+  return "Harvest";
+}
 
-    function getWeekType(seasonWeek) {
-      if (seasonWeek >= 13) return "Test Week";
-      if (seasonWeek % 4 === 0) return "Reload Week";
-      return "Build Week";
-    }
+function getSeasonClass(season) {
+  return season === "Dark Horse" ? "dark-horse" :
+         season === "Rebuild" ? "rebuild" :
+         season === "The Grind" ? "grind" : "harvest";
+}
 
-    function getPrescription(season, seasonWeek) {
-      const weekOfWave = getWeekOfWave(seasonWeek);
-      const p = seasonData[season].prescription;
+function getSeasonWeek(date) {
+  const qStart = new Date(date.getFullYear(), Math.floor(date.getMonth()/3)*3, 1);
+  return Math.floor((date - qStart) / 86400000 / 7) + 1;
+}
 
-      if (weekOfWave === "Test") return p.test;
-      if (weekOfWave === 4) return p.reload;
-      if (weekOfWave === 1) return p.build1;
-      if (weekOfWave === 2) return p.build2;
-      return p.build3;
-    }
+function getWave(w) {
+  if (w <= 4) return 1;
+  if (w <= 8) return 2;
+  return 3;
+}
 
-    function getWorkout(date, season, seasonWeek) {
-      if (seasonWeek >= 13) return "Benchmark / Test Week: " + seasonData[season].benchmark;
-      return seasonData[season].workouts[date.getDay()];
-    }
+function getWeekOfWave(w) {
+  if (w >= 13) return "Test";
+  return ((w - 1) % 4) + 1;
+}
 
-    function saveCompleted() {
-      localStorage.setItem("completedDays", JSON.stringify(completedDays));
-    }
+function getWeekType(w) {
+  if (w >= 13) return "Test Week";
+  if (w % 4 === 0) return "Reload Week";
+  return "Build Week";
+}
 
-    function renderCalendar() {
-      calendar.innerHTML = "";
+function getPrescription(season, w) {
+  const p = seasonData[season].prescription;
+  const wow = getWeekOfWave(w);
+  if (wow === "Test") return p.test;
+  if (wow === 4) return p.reload;
+  if (wow === 1) return p.build1;
+  if (wow === 2) return p.build2;
+  return p.build3;
+}
 
-      const start = new Date(year, 0, 1);
-      const end = new Date(year, 11, 31);
-      const today = new Date();
+function renderCalendar() {
+  calendar.innerHTML = "";
+  const today = new Date();
 
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const date = new Date(d);
-        const dateKey = date.toISOString().split("T")[0];
-        const season = getSeason(date);
-        const seasonWeek = getSeasonWeek(date);
-        const wave = getWave(seasonWeek);
-        const weekType = getWeekType(seasonWeek);
+  for (let d = new Date(year,0,1); d <= new Date(year,11,31); d.setDate(d.getDate()+1)) {
+    const date = new Date(d);
+    const key = date.toISOString().split("T")[0];
+    const season = getSeason(date);
+    const sw = getSeasonWeek(date);
+    const wave = getWave(sw);
+    const square = document.createElement("div");
 
-        const square = document.createElement("div");
-        square.className = `day ${getSeasonClass(season)}`;
-        square.innerText = `${wave}.${getWeekOfWave(seasonWeek)}`;
-        square.title = date.toDateString();
+    square.className = `day ${getSeasonClass(season)}`;
+    square.innerHTML = `<span>${wave}.${getWeekOfWave(sw)}</span>${completedDays[key] ? '<div class="slash"></div>' : ''}`;
 
-        if (completedDays[dateKey]) square.classList.add("completed");
+    if (completedDays[key]) square.classList.add("completed");
+    if (selectedKey === key) square.classList.add("selected");
+    if (date.toDateString() === today.toDateString()) square.classList.add("today");
 
-        if (
-          date.getFullYear() === today.getFullYear() &&
-          date.getMonth() === today.getMonth() &&
-          date.getDate() === today.getDate()
-        ) {
-          square.classList.add("today");
-        }
+    square.onclick = () => selectDay(date, key);
 
-        square.onclick = function () {
-          const workout = getWorkout(date, season, seasonWeek);
-          const prescription = getPrescription(season, seasonWeek);
+    calendar.appendChild(square);
+  }
 
-          details.innerHTML = `
-            <h2>${date.toDateString()}</h2>
+  const count = Object.keys(completedDays).length;
+  document.getElementById("completedCount").innerText = count;
+  document.getElementById("progressPercent").innerText = Math.round((count / 365) * 100) + "%";
+}
 
-            <div class="info">
-              <div class="label">Season</div>
-              <div class="value">${season}</div>
-            </div>
+function selectDay(date, key) {
+  selectedKey = key;
+  const season = getSeason(date);
+  const sw = getSeasonWeek(date);
+  const wave = getWave(sw);
+  const workout = sw >= 13 ? "Benchmark / Test Week: " + seasonData[season].benchmark : seasonData[season].workouts[date.getDay()];
 
-            <div class="info">
-              <div class="label">Primary Quality</div>
-              <div class="value">${seasonData[season].quality}</div>
-            </div>
+  details.innerHTML = `
+    <h2>Selected Day</h2>
+    <div class="row"><div class="label">Date</div><div class="value">${date.toDateString()}</div></div>
+    <div class="row"><div class="label">Season</div><div class="value">${season}</div></div>
+    <div class="row"><div class="label">Primary Quality</div><div class="value">${seasonData[season].quality}</div></div>
+    <div class="row"><div class="label">Wave / Week</div><div class="value">Wave ${wave} / Week ${getWeekOfWave(sw)}</div></div>
+    <div class="row"><div class="label">Week Type</div><div class="value">${getWeekType(sw)}</div></div>
+    <div class="row"><div class="label">Workout</div><div class="value">${workout}</div></div>
+    <div class="row"><div class="label">Lift Prescription</div><div class="value">${getPrescription(season, sw)}</div></div>
+    <div class="row"><div class="label">Season Benchmark</div><div class="value">${seasonData[season].benchmark}</div></div>
+    <button onclick="toggleComplete('${key}')">${completedDays[key] ? "Mark Incomplete" : "Mark Complete"}</button>
+  `;
+  renderCalendar();
+}
 
-            <div class="info">
-              <div class="label">Wave / Week</div>
-              <div class="value">Wave ${wave} / Week ${getWeekOfWave(seasonWeek)}</div>
-            </div>
+function toggleComplete(key) {
+  completedDays[key] ? delete completedDays[key] : completedDays[key] = true;
+  localStorage.setItem("completedDays", JSON.stringify(completedDays));
+  renderCalendar();
+}
 
-            <div class="info">
-              <div class="label">Week Type</div>
-              <div class="value">${weekType}</div>
-            </div>
-
-            <div class="info">
-              <div class="label">Workout</div>
-              <div class="value">${workout}</div>
-            </div>
-
-            <div class="info">
-              <div class="label">Lift Prescription</div>
-              <div class="value">${prescription}</div>
-            </div>
-
-            <div class="info">
-              <div class="label">Season Benchmark</div>
-              <div class="value">${seasonData[season].benchmark}</div>
-            </div>
-
-            <button onclick="toggleComplete('${dateKey}')">
-              ${completedDays[dateKey] ? "Mark Incomplete" : "Complete Day"}
-            </button>
-          `;
-        };
-
-        calendar.appendChild(square);
-      }
-    }
-
-    function toggleComplete(dateKey) {
-      if (completedDays[dateKey]) {
-        delete completedDays[dateKey];
-      } else {
-        completedDays[dateKey] = true;
-      }
-
-      saveCompleted();
-      renderCalendar();
-    }
-
-    renderCalendar();
-  </script>
+renderCalendar();
+</script>
 </body>
 </html>
