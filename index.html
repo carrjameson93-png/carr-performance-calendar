@@ -95,12 +95,13 @@
       gap: 12px;
       align-items: flex-start;
       perspective: 1000px;
+      padding-top: 46px;
     }
 
     .days-label {
       display: grid;
-      grid-template-rows: repeat(7, 24px);
-      gap: 5px;
+      grid-template-rows: repeat(7, 28px);
+      gap: 7px;
       font-size: 12px;
       color: #d0d0d0;
       padding-top: 4px;
@@ -109,22 +110,22 @@
     .calendar {
       display: grid;
       grid-template-columns: repeat(53, 24px);
-      grid-template-rows: repeat(7, 24px);
+      grid-template-rows: repeat(7, 28px);
       grid-auto-flow: column;
-      gap: 5px;
-      transform: rotateX(38deg) rotateZ(-3deg);
+      gap: 7px;
+      transform: rotateX(18deg) rotateZ(-1.5deg);
       transform-origin: top left;
-      margin: 12px 0 90px 20px;
+      margin: 10px 0 30px 20px;
     }
 
     .day {
       width: 24px;
       height: 24px;
+      align-self: end;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 4px;
       position: relative;
-      transform-style: preserve-3d;
-      color: rgba(255,255,255,.85);
+      color: rgba(255,255,255,.9);
       font-size: 7px;
       font-weight: bold;
       display: flex;
@@ -132,45 +133,48 @@
       justify-content: center;
       text-shadow: 0 1px 2px #000;
       transition: all .15s ease;
+      transform: translateY(calc(var(--height) * -1));
+      z-index: 1;
     }
 
     .day::before {
       content: "";
       position: absolute;
-      inset: 0;
-      border-radius: 3px;
+      left: 0;
+      bottom: calc(var(--height) * -1);
+      width: 24px;
+      height: calc(24px + var(--height));
+      border-radius: 4px;
       background: inherit;
-      transform: translateZ(var(--height));
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 3px 3px 5px rgba(255,255,255,.22),
-        inset -4px -4px 7px rgba(0,0,0,.6),
-        0 12px 18px rgba(0,0,0,.4);
+        inset 4px 4px 6px rgba(255,255,255,.22),
+        inset -5px -7px 9px rgba(0,0,0,.68),
+        0 14px 18px rgba(0,0,0,.45);
+      z-index: -2;
     }
 
     .day::after {
       content: "";
       position: absolute;
+      left: 0;
+      bottom: calc(var(--height) * -1);
       width: 24px;
-      height: var(--height);
-      background: rgba(0,0,0,.38);
-      bottom: 0;
-      transform-origin: bottom;
-      transform:
-        rotateX(90deg)
-        translateY(calc(var(--height) / 2))
-        translateZ(calc(var(--height) * -1));
-      border-radius: 0 0 3px 3px;
+      height: calc(24px + var(--height));
+      border-radius: 4px;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,.24), rgba(255,255,255,.04) 28%, rgba(0,0,0,.28) 100%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     .day span {
       position: relative;
-      z-index: 2;
-      transform: translateZ(calc(var(--height) + 1px));
+      z-index: 3;
     }
 
     .day:hover {
-      transform: translateZ(12px) scale(1.18);
+      transform: translateY(calc(var(--height) * -1 - 8px)) scale(1.18);
       z-index: 20;
     }
 
@@ -179,8 +183,8 @@
       width: 30px;
       height: 3px;
       background: white;
-      transform: translateZ(calc(var(--height) + 3px)) rotate(-35deg);
-      z-index: 4;
+      transform: rotate(-35deg);
+      z-index: 5;
       box-shadow: 0 1px 4px #000;
     }
 
@@ -193,8 +197,9 @@
       box-shadow:
         0 0 0 2px #fff,
         0 0 16px rgba(255,255,255,.9),
-        inset 3px 3px 5px rgba(255,255,255,.22),
-        inset -4px -4px 7px rgba(0,0,0,.6);
+        inset 4px 4px 6px rgba(255,255,255,.22),
+        inset -5px -7px 9px rgba(0,0,0,.68),
+        0 14px 18px rgba(0,0,0,.45);
     }
 
     .dark-horse { background: linear-gradient(145deg, #4c4f50, #151719); }
@@ -203,9 +208,9 @@
     .harvest { background: linear-gradient(145deg, #ffd24a, #8a650f); }
 
     .load-note {
-      margin-top: -52px;
       color: #9aa3ad;
       font-size: 13px;
+      margin-top: 6px;
     }
 
     .panel { padding: 20px; }
@@ -267,7 +272,9 @@
         transform: none;
         margin-bottom: 20px;
       }
-      .load-note { margin-top: 10px; }
+      .graph-wrap {
+        padding-top: 50px;
+      }
     }
   </style>
 </head>
@@ -453,13 +460,13 @@ function getWeekType(w) {
 function getLoadHeight(w) {
   const wow = getWeekOfWave(w);
 
-  if (wow === 1) return 12;
-  if (wow === 2) return 22;
-  if (wow === 3) return 34;
-  if (wow === 4) return 10;
-  if (wow === "Test") return 42;
+  if (wow === 1) return 6;
+  if (wow === 2) return 16;
+  if (wow === 3) return 30;
+  if (wow === 4) return 4;
+  if (wow === "Test") return 40;
 
-  return 12;
+  return 6;
 }
 
 function getPrescription(season, w) {
