@@ -1,25 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Carr Performance Calendar</title>
+  <title>Carr Performance OS</title>
   <style>
     body {
-      background: #111;
-      color: #eee;
+      margin: 0;
+      background: #0b0d0f;
+      color: #e6e6e6;
       font-family: Arial, sans-serif;
-      padding: 30px;
+    }
+
+    .app {
+      padding: 32px;
+    }
+
+    .header {
+      border-bottom: 1px solid #2a2f35;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     h1 {
-      margin-bottom: 5px;
+      margin: 0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      color: #9aa3ad;
+      margin-top: 8px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 28px;
+    }
+
+    .calendar-card, .panel {
+      background: #12161a;
+      border: 1px solid #2a2f35;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 0 30px rgba(0,0,0,.35);
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #b9c0c7;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
     }
 
     .calendar {
       display: grid;
-      grid-template-columns: repeat(52, 18px);
+      grid-template-columns: repeat(53, 18px);
       grid-template-rows: repeat(7, 18px);
-      gap: 4px;
-      margin-top: 30px;
+      grid-auto-flow: column;
+      gap: 5px;
+      overflow-x: auto;
+      padding-bottom: 10px;
     }
 
     .day {
@@ -32,46 +86,172 @@
       align-items: center;
       justify-content: center;
       color: white;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.08);
     }
 
-    .dark-horse { background: #333; }
-    .rebuild { background: #2f7d32; }
-    .grind { background: #b7410e; }
-    .harvest { background: #b8860b; }
+    .day:hover {
+      transform: scale(1.35);
+      z-index: 5;
+      border-color: #fff;
+    }
 
-    .panel {
-      margin-top: 30px;
-      padding: 20px;
-      background: #1c1c1c;
-      border: 1px solid #333;
+    .completed::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 2px;
+      background: #e6e6e6;
+      transform: rotate(-35deg);
+    }
+
+    .today {
+      outline: 2px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    .dark-horse { background: #2a2d31; }
+    .rebuild { background: #2f6f4e; }
+    .grind { background: #9a3b22; }
+    .harvest { background: #9b741f; }
+
+    .panel h2 {
+      margin-top: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .info {
+      margin: 14px 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #2a2f35;
+    }
+
+    .label {
+      color: #8f98a3;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .value {
+      font-size: 16px;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      background: #d6d6d6;
+      border: none;
       border-radius: 8px;
-      max-width: 500px;
+      color: #0b0d0f;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    button:hover {
+      background: #ffffff;
     }
   </style>
 </head>
 
 <body>
-  <h1>Carr Performance 2027</h1>
-  <p>365-Day Training Map</p>
+  <div class="app">
+    <div class="header">
+      <h1>Carr Performance OS</h1>
+      <div class="subtitle">365-Day Training Map</div>
+    </div>
 
-  <div class="calendar" id="calendar"></div>
+    <div class="layout">
+      <div class="calendar-card">
+        <div class="legend">
+          <span><div class="dot dark-horse"></div>Dark Horse</span>
+          <span><div class="dot rebuild"></div>Rebuild</span>
+          <span><div class="dot grind"></div>The Grind</span>
+          <span><div class="dot harvest"></div>Harvest</span>
+          <span>Diagonal slash = completed</span>
+        </div>
 
-  <div class="panel" id="details">
-    <h2>Select a day</h2>
-    <p>Click any square to view training details.</p>
+        <div class="calendar" id="calendar"></div>
+      </div>
+
+      <div class="panel" id="details">
+        <h2>Mission Panel</h2>
+        <p>Select a day to view the training assignment.</p>
+      </div>
+    </div>
   </div>
 
   <script>
     const calendar = document.getElementById("calendar");
     const details = document.getElementById("details");
-
     const year = 2027;
-    const start = new Date(year, 0, 1);
-    const end = new Date(year, 11, 31);
+
+    const completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
+
+    const seasonData = {
+      "Rebuild": {
+        quality: "Joint Health & Stability",
+        benchmark: "Single-leg landmine deadlift for load",
+        workouts: {
+          1: "Single-arm DB Bench + Zone 2",
+          2: "Long Run / Zone 2",
+          3: "Single-leg Landmine Deadlift",
+          4: "Upper Body Sweaty Pump",
+          5: "Carries + Sprint Work",
+          6: "Long Sweaty Pump / Zone 2",
+          0: "Recovery"
+        }
+      },
+
+      "The Grind": {
+        quality: "Work Capacity",
+        benchmark: "5K Run Time Trial + Strongman Circuit",
+        workouts: {
+          1: "Incline Barbell Bench + Zone 2",
+          2: "Long Run / Zone 2",
+          3: "Front Squats + Zone 2",
+          4: "Long Full Body Sweaty Pump / Zone 2",
+          5: "Z Press + Zone 2",
+          6: "Long Run / Sweaty Pump / Strongman Circuit",
+          0: "Recovery"
+        }
+      },
+
+      "Harvest": {
+        quality: "Hypertrophy & Anaerobic",
+        benchmark: "Cleans + Push Press for Load",
+        workouts: {
+          1: "Power Cleans",
+          2: "Upper Body Sweaty Pump",
+          3: "Push Press / Push Jerk",
+          4: "Lower Body Sweaty Pump",
+          5: "Deadlifts",
+          6: "Long Zone 2 + Carries",
+          0: "Recovery"
+        }
+      },
+
+      "Dark Horse": {
+        quality: "Low Gear Strength / Powerbuilding",
+        benchmark: "1RM Front Squat, Deadlift, Bench",
+        workouts: {
+          1: "Front Squats",
+          2: "Upper Body Hypertrophy + Zone 2",
+          3: "Deadlifts",
+          4: "Lower Body Hypertrophy + Zone 2",
+          5: "Bench",
+          6: "Long Zone 2",
+          0: "Recovery"
+        }
+      }
+    };
 
     function getSeason(date) {
       const month = date.getMonth() + 1;
-
       if (month >= 1 && month <= 3) return "Dark Horse";
       if (month >= 4 && month <= 6) return "Rebuild";
       if (month >= 7 && month <= 9) return "The Grind";
@@ -83,12 +263,6 @@
       if (season === "Rebuild") return "rebuild";
       if (season === "The Grind") return "grind";
       return "harvest";
-    }
-
-    function getWeekOfYear(date) {
-      const firstDay = new Date(date.getFullYear(), 0, 1);
-      const pastDays = Math.floor((date - firstDay) / 86400000);
-      return Math.floor(pastDays / 7) + 1;
     }
 
     function getSeasonWeek(date) {
@@ -106,54 +280,107 @@
     }
 
     function getWeekType(seasonWeek) {
-      if (seasonWeek === 13) return "Test Week";
+      if (seasonWeek >= 13) return "Test Week";
       if (seasonWeek % 4 === 0) return "Reload Week";
       return "Build Week";
     }
 
-    function getWorkout(date, season) {
-      const day = date.getDay();
-
-      const weeklyTemplate = [
-        "Recovery",
-        "Lower Strength + Engine",
-        "Zone 2",
-        "Upper Strength + Pump",
-        "Conditioning",
-        "Strength + Pump",
-        "Long Engine"
-      ];
-
-      return weeklyTemplate[day];
+    function getWorkout(date, season, seasonWeek) {
+      if (seasonWeek >= 13) return "Benchmark / Test Week: " + seasonData[season].benchmark;
+      return seasonData[season].workouts[date.getDay()];
     }
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const date = new Date(d);
-      const season = getSeason(date);
-      const seasonWeek = getSeasonWeek(date);
-      const wave = getWave(seasonWeek);
-      const weekType = getWeekType(seasonWeek);
-      const workout = getWorkout(date, season);
-
-      const square = document.createElement("div");
-      square.className = `day ${getSeasonClass(season)}`;
-      square.innerText = `W${wave}`;
-      square.title = date.toDateString();
-
-      square.onclick = function () {
-        details.innerHTML = `
-          <h2>${date.toDateString()}</h2>
-          <p><strong>Season:</strong> ${season}</p>
-          <p><strong>Wave:</strong> ${wave}</p>
-          <p><strong>Season Week:</strong> ${seasonWeek}</p>
-          <p><strong>Year Week:</strong> ${getWeekOfYear(date)}</p>
-          <p><strong>Week Type:</strong> ${weekType}</p>
-          <p><strong>Workout:</strong> ${workout}</p>
-        `;
-      };
-
-      calendar.appendChild(square);
+    function saveCompleted() {
+      localStorage.setItem("completedDays", JSON.stringify(completedDays));
     }
+
+    function renderCalendar() {
+      calendar.innerHTML = "";
+
+      const start = new Date(year, 0, 1);
+      const end = new Date(year, 11, 31);
+      const today = new Date();
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const date = new Date(d);
+        const dateKey = date.toISOString().split("T")[0];
+        const season = getSeason(date);
+        const seasonWeek = getSeasonWeek(date);
+        const wave = getWave(seasonWeek);
+        const weekType = getWeekType(seasonWeek);
+        const workout = getWorkout(date, season, seasonWeek);
+
+        const square = document.createElement("div");
+        square.className = `day ${getSeasonClass(season)}`;
+        square.innerText = `${wave}.${seasonWeek}`;
+        square.title = date.toDateString();
+
+        if (completedDays[dateKey]) square.classList.add("completed");
+
+        if (
+          date.getFullYear() === today.getFullYear() &&
+          date.getMonth() === today.getMonth() &&
+          date.getDate() === today.getDate()
+        ) {
+          square.classList.add("today");
+        }
+
+        square.onclick = function () {
+          details.innerHTML = `
+            <h2>${date.toDateString()}</h2>
+
+            <div class="info">
+              <div class="label">Season</div>
+              <div class="value">${season}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Primary Quality</div>
+              <div class="value">${seasonData[season].quality}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Wave / Week</div>
+              <div class="value">Wave ${wave} / Season Week ${seasonWeek}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Week Type</div>
+              <div class="value">${weekType}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Workout</div>
+              <div class="value">${workout}</div>
+            </div>
+
+            <div class="info">
+              <div class="label">Season Benchmark</div>
+              <div class="value">${seasonData[season].benchmark}</div>
+            </div>
+
+            <button onclick="toggleComplete('${dateKey}')">
+              ${completedDays[dateKey] ? "Mark Incomplete" : "Complete Day"}
+            </button>
+          `;
+        };
+
+        calendar.appendChild(square);
+      }
+    }
+
+    function toggleComplete(dateKey) {
+      if (completedDays[dateKey]) {
+        delete completedDays[dateKey];
+      } else {
+        completedDays[dateKey] = true;
+      }
+
+      saveCompleted();
+      renderCalendar();
+    }
+
+    renderCalendar();
   </script>
 </body>
 </html>
