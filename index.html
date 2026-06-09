@@ -1,13 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Carr Performance OS</title>
+  <title>Carr Performance Calendar</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(52, 18px);
+      grid-template-rows: repeat(7, 18px);
+      gap: 4px;
+      margin-top: 30px;
+    }
+
+    .day {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .dark-horse { background: #333; }
+    .rebuild { background: #2f7d32; }
+    .grind { background: #b7410e; }
+    .harvest { background: #b8860b; }
+
+    .panel {
+      margin-top: 30px;
+      padding: 20px;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 8px;
+      max-width: 500px;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>Carr Performance 2027</h1>
+  <h1>Carr Performance 2027</h1>
+  <p>365-Day Training Map</p>
 
-    <p>Dark Horse | Rebuild | Grind | Harvest</p>
+  <div class="calendar" id="calendar"></div>
 
-    <p>First test page.</p>
+  <div class="panel" id="details">
+    <h2>Select a day</h2>
+    <p>Click any square to view training details.</p>
+  </div>
+
+  <script>
+    const calendar = document.getElementById("calendar");
+    const details = document.getElementById("details");
+
+    const year = 2027;
+    const start = new Date(year, 0, 1);
+    const end = new Date(year, 11, 31);
+
+    function getSeason(date) {
+      const month = date.getMonth() + 1;
+
+      if (month >= 1 && month <= 3) return "Dark Horse";
+      if (month >= 4 && month <= 6) return "Rebuild";
+      if (month >= 7 && month <= 9) return "The Grind";
+      return "Harvest";
+    }
+
+    function getSeasonClass(season) {
+      if (season === "Dark Horse") return "dark-horse";
+      if (season === "Rebuild") return "rebuild";
+      if (season === "The Grind") return "grind";
+      return "harvest";
+    }
+
+    function getWeekOfYear(date) {
+      const firstDay = new Date(date.getFullYear(), 0, 1);
+      const pastDays = Math.floor((date - firstDay) / 86400000);
+      return Math.floor(pastDays / 7) + 1;
+    }
+
+    function getSeasonWeek(date) {
+      const month = date.getMonth();
+      const quarterStartMonth = Math.floor(month / 3) * 3;
+      const quarterStart = new Date(date.getFullYear(), quarterStartMonth, 1);
+      const pastDays = Math.floor((date - quarterStart) / 86400000);
+      return Math.floor(pastDays / 7) + 1;
+    }
+
+    function getWave(seasonWeek) {
+      if (seasonWeek <= 4) return 1;
+      if (seasonWeek <= 8) return 2;
+      return 3;
+    }
+
+    function getWeekType(seasonWeek) {
+      if (seasonWeek === 13) return "Test Week";
+      if (seasonWeek % 4 === 0) return "Reload Week";
+      return "Build Week";
+    }
+
+    function getWorkout(date, season) {
+      const day = date.getDay();
+
+      const weeklyTemplate = [
+        "Recovery",
+        "Lower Strength + Engine",
+        "Zone 2",
+        "Upper Strength + Pump",
+        "Conditioning",
+        "Strength + Pump",
+        "Long Engine"
+      ];
+
+      return weeklyTemplate[day];
+    }
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const date = new Date(d);
+      const season = getSeason(date);
+      const seasonWeek = getSeasonWeek(date);
+      const wave = getWave(seasonWeek);
+      const weekType = getWeekType(seasonWeek);
+      const workout = getWorkout(date, season);
+
+      const square = document.createElement("div");
+      square.className = `day ${getSeasonClass(season)}`;
+      square.innerText = `W${wave}`;
+      square.title = date.toDateString();
+
+      square.onclick = function () {
+        details.innerHTML = `
+          <h2>${date.toDateString()}</h2>
+          <p><strong>Season:</strong> ${season}</p>
+          <p><strong>Wave:</strong> ${wave}</p>
+          <p><strong>Season Week:</strong> ${seasonWeek}</p>
+          <p><strong>Year Week:</strong> ${getWeekOfYear(date)}</p>
+          <p><strong>Week Type:</strong> ${weekType}</p>
+          <p><strong>Workout:</strong> ${workout}</p>
+        `;
+      };
+
+      calendar.appendChild(square);
+    }
+  </script>
 </body>
 </html>
